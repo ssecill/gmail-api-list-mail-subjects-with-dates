@@ -84,7 +84,7 @@ def main():
     service = authenticate_gmail()
 
     # Tarih aralığı belirleme
-    start_date = '2024/06/14'  # Başlangıç tarihi
+    start_date = bugun.strftime('%Y/%m/%d') #'2024/06/20'  # Başlangıç tarihi
     end_date = (bugun + timedelta(days=1)).strftime('%Y/%m/%d') # Bitiş tarihi
 
     # Gmail arama sorgusu
