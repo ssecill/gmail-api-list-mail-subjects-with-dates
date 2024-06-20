@@ -9,6 +9,7 @@ import pandas as pd
 from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import Alignment
+import pytz
 
 # Yetkilendirme kapsamları
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
@@ -85,8 +86,6 @@ def main():
     # Tarih aralığı belirleme
     start_date = '2024/06/14'  # Başlangıç tarihi
     end_date = (bugun + timedelta(days=1)).strftime('%Y/%m/%d') # Bitiş tarihi
-    #end_date = '2024/06/20'  
-    #end_date = bugun + timedelta(days=10)
 
     # Gmail arama sorgusu
     query = f'label:aws-alarm after:{start_date} before:{end_date}'
@@ -107,10 +106,17 @@ def main():
 
         if email_data:
             df = pd.DataFrame(email_data, columns=['DateTime', 'Subject'])
+            
             # Set date format explicitly
             df['DateTime'] = df['DateTime'].dt.strftime('%Y-%m-%d %H:%M:%S')
+            
+            # Yerel saat dilimi kolonu ekle
+            local_tz = pytz.timezone('Europe/Istanbul')  # Yerel saat dilimini belirtin
+            df['LocalDateTime'] = pd.to_datetime(df['DateTime']).apply(lambda x: pytz.utc.localize(x).astimezone(local_tz).strftime('%Y-%m-%d %H:%M:%S'))
+            
             print(df)
             print(f'Total Emails: {len(email_data)}')
+            
             # Save the dataframe to an Excel file
             file_path = 'email_data.xlsx'
             df.to_excel(file_path, index=False)
