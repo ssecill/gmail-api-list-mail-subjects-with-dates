@@ -1,6 +1,6 @@
 import os
 import json
-from datetime import datetime
+from datetime import datetime,timedelta
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -9,7 +9,7 @@ import pandas as pd
 
 # Yetkilendirme kapsamları
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
-
+bugun = datetime.now()
 
 def authenticate_gmail():
     creds = None
@@ -70,7 +70,9 @@ def main():
 
     # Tarih aralığı belirleme
     start_date = '2024/06/14'  # Başlangıç tarihi
-    end_date = '2024/06/20'  # Bitiş tarihi
+    end_date = (bugun + timedelta(days=1)).strftime('%Y/%m/%d') # Bitiş tarihi
+    #end_date = '2024/06/20'  
+    #end_date = bugun + timedelta(days=10)
 
     # Gmail arama sorgusu
     query = f'label:aws-alarm after:{start_date} before:{end_date}'
