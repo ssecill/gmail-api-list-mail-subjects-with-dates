@@ -69,8 +69,8 @@ def main():
     service = authenticate_gmail()
 
     # Tarih aralığı belirleme
-    start_date = '2024/06/01'  # Başlangıç tarihi
-    end_date = '2024/06/02'  # Bitiş tarihi
+    start_date = '2024/06/14'  # Başlangıç tarihi
+    end_date = '2024/06/20'  # Bitiş tarihi
 
     # Gmail arama sorgusu
     query = f'label:aws-alarm after:{start_date} before:{end_date}'
@@ -91,6 +91,8 @@ def main():
 
         if email_data:
             df = pd.DataFrame(email_data, columns=['DateTime', 'Subject'])
+            # Set date format explicitly
+            df['DateTime'] = df['DateTime'].dt.strftime('%Y-%m-%d %H:%M:%S')
             print(df)
             print(f'Total Emails: {len(email_data)}')
             # Save the dataframe to an Excel file
