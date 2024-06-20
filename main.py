@@ -1,11 +1,14 @@
 import os
 import json
-from datetime import datetime,timedelta
+from datetime import datetime, timedelta
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 import pandas as pd
+from openpyxl import load_workbook
+from openpyxl.utils import get_column_letter
+from openpyxl.styles import Alignment
 
 # Yetkilendirme kapsamları
 SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
@@ -30,7 +33,6 @@ def authenticate_gmail():
 
     return build('gmail', 'v1', credentials=creds)
 
-
 def list_messages(service, user_id, query=''):
     try:
         response = service.users().messages().list(userId=user_id, q=query).execute()
@@ -45,7 +47,6 @@ def list_messages(service, user_id, query=''):
     except Exception as error:
         print(f'An error occurred: {error}')
         return []
-
 
 def get_message_details(service, user_id, msg_id):
     try:
@@ -64,6 +65,19 @@ def get_message_details(service, user_id, msg_id):
         print(f'An error occurred: {error}')
         return None, None
 
+def adjust_column_width_and_wrap_text(ws):
+    for col in ws.columns:
+        max_length = 0
+        column = col[0].column_letter
+        for cell in col:
+            try:
+                if len(str(cell.value)) > max_length:
+                    max_length = len(cell.value)
+            except:
+                pass
+            cell.alignment = Alignment(wrap_text=True)
+        adjusted_width = (max_length + 2)
+        ws.column_dimensions[column].width = adjusted_width
 
 def main():
     service = authenticate_gmail()
@@ -98,11 +112,17 @@ def main():
             print(df)
             print(f'Total Emails: {len(email_data)}')
             # Save the dataframe to an Excel file
-            df.to_excel('email_data.xlsx', index=False)
+            file_path = 'email_data.xlsx'
+            df.to_excel(file_path, index=False)
+
+            # Adjust column width and wrap text
+            wb = load_workbook(file_path)
+            ws = wb.active
+            adjust_column_width_and_wrap_text(ws)
+            wb.save(file_path)
             print('Data saved to email_data.xlsx')
         else:
             print('No valid messages found.')
-
 
 if __name__ == '__main__':
     main()
